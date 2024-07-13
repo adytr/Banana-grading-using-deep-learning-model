@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Banana Ripeness Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 50px;
+            font-size: 28px;
+        }
+        .result {
+            margin-top: 50px;
+        }
+        .result-text {
+            font-size: 24px;
+        }
+        .back-button {
+            margin-top: 20px;
+        }
+        .back-button a {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Banana Ripeness Detection 🍌</h1>
+    <div class="result">
+        <h2 class="result-text">Prediction: {{ prediction }}</h2>
+    </div>
+    <div class="back-button">
+        <a href="/">Go Back</a>
+    </div>
+</body>
+</html>

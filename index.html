@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Banana Ripeness Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 50px;
+            font-size: 28px;
+        }
+        .container {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .upload-form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .upload-form input[type="file"] {
+            margin-bottom: 20px;
+        }
+        .upload-form input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .result {
+            margin-top: 50px;
+        }
+        .result-text {
+            font-size: 24px;
+        }
+        .image-preview {
+            margin-top: 20px;
+            max-width: 400px;
+            max-height: 400px;
+            display: none;
+        }
+        .image-error {
+            margin-top: 10px;
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+    <script>
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const imgElement = document.getElementById('image-preview');
+                imgElement.setAttribute('src', e.target.result);
+                imgElement.style.display = 'block';
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function validateImageType(event) {
+            const file = event.target.files[0];
+            const allowedTypes = ['image/jpeg', 'image/png'];
+
+            if (!allowedTypes.includes(file.type)) {
+                event.target.value = '';
+                const errorElement = document.getElementById('image-error');
+                errorElement.textContent = 'Invalid image format. Please choose a JPEG or PNG image.';
+            } else {
+                const errorElement = document.getElementById('image-error');
+                errorElement.textContent = '';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Banana Ripeness Detection 🍌</h1>
+        <div>
+            <form class="upload-form" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".jpg, .png" onchange="validateImageType(event); handleImageUpload(event);" />
+                <input type="submit" value="Predict Ripeness Stage" />
+                <div id="image-error" class="image-error"></div>
+            </form>
+        </div>
+        <div class="result">
+            {% if prediction %}
+                <h2 class="result-text">Prediction: {{ prediction }}</h2>
+            {% endif %}
+        </div>
+        <div>
+            <img id="image-preview" class="image-preview" alt="Image Preview" />
+        </div>
+    </div>
+</body>
+</html>
