@@ -1,42 +1,54 @@
-
+from flask import Flask, render_template, request, redirect, url_for
 import tensorflow as tf
 from PIL import Image, ImageOps
 import numpy as np
-import streamlit as st
+import os
 
-st.write('''
-# Banana Ripeness Detection 🍌
-''')
-st.write("A Image Classification Web App That Detects the Ripeness Stage of Banana")
+app = Flask(__name__)
 
-file = st.file_uploader("", type=['jpg','png'])
+# Load the model
+model = tf.keras.models.load_model('ripeness.h5')
 
-
-def predict_stage(image_data,model):
+def predict_stage(image_path):
     size = (224, 224)
-    image = ImageOps.fit(image_data,size, Image.ANTIALIAS)
+    image = Image.open(image_path)
+    image = ImageOps.fit(image, size, Image.ANTIALIAS)
     image_array = np.array(image)
     normalized_image_array = (image_array.astype(np.float32) / 127.0) - 1
     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
     data[0] = normalized_image_array
-    preds = ""
     prediction = model.predict(data)
-    if np.argmax(prediction)==0:
-        st.write(f"Unripe")
-    elif np.argmax(prediction)==1:
-        st.write(f"Overripe")
-    else :
-        st.write(f"Ripe")
-
     return prediction
 
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-if file is None:
-    st.text("Please upload an image file")
-else:
-    image = Image.open(file)
-    st.image(image, use_column_width=True)
-    model = tf.keras.models.load_model('ripeness.h5')
-    Generate_pred = st.button("Predict Ripeness Stage..")
-    if Generate_pred:
-        prediction = predict_stage(image, model)
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return redirect(url_for('index'))
+    
+    file = request.files['file']
+    if file.filename == '':
+        return redirect(url_for('index'))
+
+    if file:
+        file_path = os.path.join('uploads', file.filename)
+        file.save(file_path)
+        prediction = predict_stage(file_path)
+        if np.argmax(prediction) == 0:
+            result = "Unripe"
+        elif np.argmax(prediction) == 1:
+            result = "Overripe"
+        else:
+            result = "Ripe"
+        os.remove(file_path)  # Clean up the uploaded file
+        return render_template('result.html', result=result)
+    
+    return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    if not os.path.exists('uploads'):
+        os.makedirs('uploads')
+    app.run(debug=True)
